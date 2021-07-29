@@ -235,5 +235,8 @@ files:
     \nif __name__ == '__main__':\n    DuplicateFileHandlerCheck().run_tests()\n"
   learner_created: false
 feedback_link: https://hyperskill.org/projects/176/stages/907/implement#comment
-status: Unchecked
-record: -1
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Thu, 29 Jul 2021 16:12:19 UTC
+record: 3
