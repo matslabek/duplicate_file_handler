@@ -16,7 +16,6 @@ if __name__ == "__main__":
         args = parser.parse_args()
 
         file_format = input("Enter file format:\n")
-
         files_list = []
 
         files_dict = dict()
@@ -24,9 +23,9 @@ if __name__ == "__main__":
         for root, dirs, files in os.walk(args.root_directory, topdown=True):
             for name in files:
                 file_name, file_extension = os.path.splitext(os.path.join(root, name))
-                if not file_format:
+                if file_format == " " or not file_format:
                     files_list.append(file_name + file_extension)
-                elif file_extension == file_format:
+                elif file_extension[1:] == file_format:
                     files_list.append(file_name + file_extension)
 
         """Update dictionary with duplicate files"""
@@ -64,13 +63,14 @@ if __name__ == "__main__":
                 print("Wrong option")
 
         hashes_dict = {}    #has structure of: {bytes: { hash: [filepath1, filepath2... ] } }
-        duplicates_list = []  # list of tuples (hash, filepath) where index is the identifying number,
+        duplicates_list = []  # list of tuples (hash, filepath, bytes) where index is the identifying number,
         # for the next stage
 
         BUF_SIZE = 65536
         line_number = 1
 
         while True:
+            """List duplicate files"""
             duplicates_check = input("Check for duplicates?\n")
             if duplicates_check == "yes":
                 for file_bytes in files_bytes:
@@ -94,7 +94,38 @@ if __name__ == "__main__":
                             for file_path in hashes_dict[file_bytes][hash_alg_digest]:
                                 print(str(line_number) + ".", file_path)
                                 line_number += 1
-                                duplicates_list.append((hash_alg_digest, file_path))
+                                duplicates_list.append((hash_alg_digest, file_path, file_bytes))
+                while True:
+                    """Delete chosen duplicate files"""
+                    delete_check = input("Delete files?")
+                    if delete_check == "yes":
+                        freed_space = 0
+                        while True:
+                            print("Duplicates list", duplicates_list)
+                            files_to_delete = input("Enter files to delete (numbers, separated with space):")
+                            print(files_to_delete)
+                            if not files_to_delete:
+                                print("Wrong format")
+                                continue
+                            try:
+                                files_deleted = list(map(int, files_to_delete.split()))
+                                for file_numb in files_deleted:
+                                    if file_numb > len(duplicates_list):
+                                        print("Wrong format")
+                                        break
+                                for file_numb in files_deleted:
+                                    os.remove(duplicates_list[file_numb - 1][1])
+                                    freed_space += duplicates_list[file_numb - 1][2]
+                                print("Total freed up space:", freed_space, "bytes")
+                                break
+                            except (ValueError, TypeError):
+                                print("Wrong format")
+                    elif delete_check == "no":
+                        break
+                    else:
+                        print("Wrong option")
+                        continue
+                    break
                 break
             elif duplicates_check == "no":
                 break
